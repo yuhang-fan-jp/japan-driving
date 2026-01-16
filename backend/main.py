@@ -5,6 +5,9 @@ from app.database import engine, Base, get_db
 from app import models, schemas
 from app.security import hash_password
 
+from app.security import verify_password
+from app.auth import create_access_token
+
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
@@ -29,6 +32,24 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
+@app.post("/login", response_model=schemas.TokenResponse)
+def login(data: schemas.LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(
+        models.User.email == data.email
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    if not verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    token = create_access_token({"sub": str(user.id)})
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 @app.get("/health")
 def health():
