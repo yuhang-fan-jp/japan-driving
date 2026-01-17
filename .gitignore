@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# environment variables
+.env
+.env.*
+
+# SQLite
+*.db
+
+# macOS
+.DS_Store
