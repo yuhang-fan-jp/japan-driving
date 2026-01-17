@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from app.database import engine, Base, get_db
 from app import models, schemas
 from app.security import hash_password
-
 from app.security import verify_password
 from app.auth import create_access_token
+from app.auth import get_current_user
+from fastapi.security import OAuth2PasswordRequestForm
 
 app = FastAPI()
 
@@ -33,15 +33,18 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 @app.post("/login", response_model=schemas.TokenResponse)
-def login(data: schemas.LoginRequest, db: Session = Depends(get_db)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
     user = db.query(models.User).filter(
-        models.User.email == data.email
+        models.User.email == form_data.username
     ).first()
 
     if not user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    if not verify_password(data.password, user.password_hash):
+    if not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     token = create_access_token({"sub": str(user.id)})
@@ -54,3 +57,10 @@ def login(data: schemas.LoginRequest, db: Session = Depends(get_db)):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/me")
+def read_me(current_user=Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "email": current_user.email
+    }
