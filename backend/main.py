@@ -8,8 +8,11 @@ from app.auth import create_access_token
 from app.auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 from app.auth import get_current_user
+from app.routers import images
 
 app = FastAPI()
+
+app.include_router(images.router)
 
 Base.metadata.create_all(bind=engine)
 
