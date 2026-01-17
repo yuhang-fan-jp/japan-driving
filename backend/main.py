@@ -7,6 +7,7 @@ from app.security import verify_password
 from app.auth import create_access_token
 from app.auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
+from app.auth import get_current_user
 
 app = FastAPI()
 
@@ -64,3 +65,12 @@ def read_me(current_user=Depends(get_current_user)):
         "id": current_user.id,
         "email": current_user.email
     }
+
+@app.get("/questions", response_model=list[schemas.QuestionPublic])
+def get_questions(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    questions = db.query(models.Question).limit(50).all()
+    return questions
+
