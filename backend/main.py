@@ -9,10 +9,13 @@ from app.auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 from app.auth import get_current_user
 from app.routers import images
+from fastapi import FastAPI
+from app.routers import quiz
 
 app = FastAPI()
 
 app.include_router(images.router)
+app.include_router(quiz.router)
 
 Base.metadata.create_all(bind=engine)
 

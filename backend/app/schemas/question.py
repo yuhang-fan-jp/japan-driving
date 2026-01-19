@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from pydantic import BaseModel
+from typing import Optional
 
 class QuestionPublic(BaseModel):
     id: int
@@ -7,3 +9,8 @@ class QuestionPublic(BaseModel):
 
     class Config:
         from_attributes = True  # 后面接 SQLAlchemy
+
+class QuestionOut(BaseModel):
+    id: int
+    content: str
+    image_url: Optional[str]
