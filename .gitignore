@@ -1,15 +1,12 @@
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
+# backend
+backend/venv/
+backend/__pycache__/
+backend/*.db
+backend/.env
 
-# environment variables
-.env
-.env.*
+# frontend
+frontend/node_modules/
+frontend/dist/
 
-# SQLite
-*.db
-
-# macOS
+# system
 .DS_Store
