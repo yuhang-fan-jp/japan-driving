@@ -2,17 +2,19 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import engine, Base, get_db
 from app import models, schemas
+from fastapi import APIRouter, Depends
 from app.security import hash_password
 from app.security import verify_password
 from app.auth import create_access_token
 from app.auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
-from app.auth import get_current_user
+from fastapi.security import OAuth2PasswordBearer
 from app.routers import images
-from fastapi import FastAPI
 from app.routers import quiz
 
-app = FastAPI()
+app = FastAPI(
+    title="Japan Driving Quiz API",
+)
 
 app.include_router(images.router)
 app.include_router(quiz.router)

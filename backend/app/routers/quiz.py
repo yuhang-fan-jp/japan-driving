@@ -5,6 +5,10 @@ from typing import List
 from app.schemas.quiz_submit import QuizSubmitRequest
 from app.schemas.quiz_result import QuizResult, QuizDetail
 from fastapi import Depends
+from app.auth import get_current_user
+from app.schemas.quiz_session import QuizSessionOut
+from app.schemas.wrong_question import WrongQuestionOut
+import sqlite3
 
 router = APIRouter(prefix="/quiz", tags=["Quiz"])
 
@@ -25,7 +29,10 @@ def get_questions(limit: int = 50):
 
     return [dict(row) for row in rows]
 @router.post("/submit", response_model=QuizResult)
-def submit_quiz(data: QuizSubmitRequest):
+def submit_quiz(
+    data: QuizSubmitRequest,
+    current_user = Depends(get_current_user)
+):
     db = get_db()
     cursor = db.cursor()
 
@@ -33,10 +40,8 @@ def submit_quiz(data: QuizSubmitRequest):
     score = 0
     details = []
 
-    # ⚠️ 现在先写死 user_id = 1（等会再接登录）
-    user_id = 1
+    user_id = current_user.id
 
-    # 先创建一次刷题记录（占位）
     cursor.execute("""
         INSERT INTO quiz_sessions (user_id, score, total)
         VALUES (?, ?, ?)
@@ -82,7 +87,6 @@ def submit_quiz(data: QuizSubmitRequest):
             )
         )
 
-    # 更新最终分数
     cursor.execute("""
         UPDATE quiz_sessions
         SET score = ?
@@ -97,3 +101,47 @@ def submit_quiz(data: QuizSubmitRequest):
         total=total,
         details=details
     )
+@router.get("/sessions", response_model=list[QuizSessionOut])
+def get_my_sessions(
+    current_user = Depends(get_current_user)
+):
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT id, score, total, created_at
+        FROM quiz_sessions
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+    """, (current_user.id,))
+
+    rows = cursor.fetchall()
+    db.close()
+
+    return [dict(row) for row in rows]
+@router.get("/wrong-questions", response_model=list[WrongQuestionOut])
+def get_wrong_questions(
+    current_user = Depends(get_current_user)
+):
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT DISTINCT
+            q.id AS question_id,
+            q.content,
+            q.image_url,
+            q.correct_answer,
+            q.explanation
+        FROM quiz_answers qa
+        JOIN quiz_sessions qs ON qa.session_id = qs.id
+        JOIN questions q ON qa.question_id = q.id
+        WHERE qs.user_id = ?
+          AND qa.is_correct = 0
+        ORDER BY q.id
+    """, (current_user.id,))
+
+    rows = cursor.fetchall()
+    db.close()
+
+    return [dict(row) for row in rows]
