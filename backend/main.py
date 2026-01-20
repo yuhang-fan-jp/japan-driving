@@ -7,13 +7,29 @@ from app.security import hash_password
 from app.security import verify_password
 from app.auth import create_access_token
 from app.auth import get_current_user
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.security import OAuth2PasswordBearer
+#from fastapi.security import OAuth2PasswordRequestForm
+#from fastapi.security import OAuth2PasswordBearer
 from app.routers import images
 from app.routers import quiz
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 app = FastAPI(
     title="Japan Driving Quiz API",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(images.router)
@@ -43,17 +59,17 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/login", response_model=schemas.TokenResponse)
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    data: LoginRequest,
     db: Session = Depends(get_db),
 ):
     user = db.query(models.User).filter(
-        models.User.email == form_data.username
+        models.User.email == data.email
     ).first()
 
     if not user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    if not verify_password(form_data.password, user.password_hash):
+    if not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     token = create_access_token({"sub": str(user.id)})
