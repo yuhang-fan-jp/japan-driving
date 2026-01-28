@@ -7,10 +7,9 @@ from app.security import hash_password
 from app.security import verify_password
 from app.auth import create_access_token
 from app.auth import get_current_user
-#from fastapi.security import OAuth2PasswordRequestForm
-#from fastapi.security import OAuth2PasswordBearer
 from app.routers import images
 from app.routers import quiz
+from app.routers import admin
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -34,6 +33,7 @@ app.add_middleware(
 
 app.include_router(images.router)
 app.include_router(quiz.router)
+app.include_router(admin.router)
 
 Base.metadata.create_all(bind=engine)
 

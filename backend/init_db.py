@@ -1,19 +1,12 @@
-from app.db import get_db
+from app.database import engine
+from app.models import Base
 
-db = get_db()
-cursor = db.cursor()
+def init_db():
+    print("📦 开始初始化数据库表结构...")
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS questions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content TEXT NOT NULL,
-    image_url TEXT,
-    correct_answer BOOLEAN NOT NULL,
-    explanation TEXT
-)
-""")
+    Base.metadata.create_all(bind=engine)
 
-db.commit()
-db.close()
+    print("✅ 数据库初始化完成")
 
-print("questions 表创建完成")
+if __name__ == "__main__":
+    init_db()

@@ -1,19 +1,24 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/Login.vue";
+import Home from "../views/Home.vue";
 import Quiz from "../views/Quiz.vue";
 import Result from "../views/Result.vue";
 import WrongBook from "../views/WrongBook.vue";
-
-
+import Practice from "../views/Practice.vue";
 
 const routes = [
   {
     path: "/",
-    redirect: "/login",
+    redirect: "/home",
   },
   {
     path: "/login",
     component: Login,
+  },
+  {
+    path: "/home",
+    component: Home,
+    meta: { requiresAuth: true },
   },
   {
     path: "/quiz",
@@ -30,6 +35,11 @@ const routes = [
     component: WrongBook,
     meta: { requiresAuth: true },
   },
+  {
+  path: "/practice",
+  component: Practice,
+  meta: { requiresAuth: true },
+},
 ];
 
 const router = createRouter({
@@ -42,7 +52,7 @@ router.beforeEach((to, from, next) => {
 
   // 已登录用户不允许回到登录页
   if (to.path === "/login" && token) {
-    next("/quiz");
+    next("/home");
     return;
   }
 

@@ -26,7 +26,7 @@ const login = async () => {
     });
 
     localStorage.setItem("token", res.data.access_token);
-    router.push("/quiz");
+    router.push("/home");
   } catch (err) {
     console.error(err);
     alert("登录失败");
