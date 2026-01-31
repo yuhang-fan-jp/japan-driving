@@ -5,6 +5,8 @@ import Quiz from "../views/Quiz.vue";
 import Result from "../views/Result.vue";
 import WrongBook from "../views/WrongBook.vue";
 import Practice from "../views/Practice.vue";
+import Register from "../views/Register.vue";
+import Profile from "../views/Profile.vue";
 
 const routes = [
   {
@@ -39,7 +41,17 @@ const routes = [
   path: "/practice",
   component: Practice,
   meta: { requiresAuth: true },
-},
+  },
+  {
+  path: "/register",
+  component: Register,
+  },
+
+{
+  path: "/profile",
+  name: "Profile",
+  component: Profile,
+}
 ];
 
 const router = createRouter({

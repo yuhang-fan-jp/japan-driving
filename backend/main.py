@@ -1,25 +1,24 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import engine, Base, get_db
-from app import models, schemas
-from fastapi import APIRouter, Depends
-from app.security import hash_password
-from app.security import verify_password
-from app.auth import create_access_token
-from app.auth import get_current_user
-from app.routers import images
-from app.routers import quiz
-from app.routers import admin
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from app.database import engine, Base, get_db
+from app import models, schemas
+from app.security import hash_password, verify_password
+from app.auth import create_access_token, get_current_user
+from app.routers import images, quiz, admin, user
+
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
+
 app = FastAPI(
     title="Japan Driving Quiz API",
 )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -34,8 +33,10 @@ app.add_middleware(
 app.include_router(images.router)
 app.include_router(quiz.router)
 app.include_router(admin.router)
+app.include_router(user.router)
 
 Base.metadata.create_all(bind=engine)
+
 
 @app.post("/register", response_model=schemas.UserResponse)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -48,7 +49,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     new_user = models.User(
         email=user.email,
-        password_hash=hash_password(user.password)
+        password=hash_password(user.password)
     )
 
     db.add(new_user)
@@ -56,6 +57,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return new_user
+
 
 @app.post("/login", response_model=schemas.TokenResponse)
 def login(
@@ -69,7 +71,7 @@ def login(
     if not user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    if not verify_password(data.password, user.password_hash):
+    if not verify_password(data.password, user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     token = create_access_token({"sub": str(user.id)})
@@ -79,9 +81,11 @@ def login(
         "token_type": "bearer"
     }
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.get("/me")
 def read_me(current_user=Depends(get_current_user)):
@@ -90,11 +94,10 @@ def read_me(current_user=Depends(get_current_user)):
         "email": current_user.email
     }
 
+
 @app.get("/questions", response_model=list[schemas.QuestionPublic])
 def get_questions(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    questions = db.query(models.Question).limit(50).all()
-    return questions
-
+    return db.query(models.Question).limit(50).all()

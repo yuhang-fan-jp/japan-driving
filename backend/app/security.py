@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from app.db import get_db
 from app import models
-from app.core.jwt import decode_access_token  # 你生成 token 的对应解码函数
+from app.core.jwt import decode_access_token  # 生成 token 的对应解码函数
 
 SECRET_KEY = "CHANGE_ME"
 ALGORITHM = "HS256"

@@ -1,6 +1,10 @@
 from sqlalchemy import (
-    Column, Integer, String, DateTime,
-    Boolean, ForeignKey
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Boolean,
+    ForeignKey,
 )
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -15,15 +19,13 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-
-    nickname = Column(String, default="")
-    avatar_url = Column(String, default="")
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    sessions = relationship("QuizSession", back_populates="user")
-
+    password = Column(String, nullable=False)
+    nickname = Column(String(20))
+    sessions = relationship(
+        "QuizSession",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
 # =====================
 # 题目（判断题）

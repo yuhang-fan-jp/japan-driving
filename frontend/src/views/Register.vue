@@ -1,8 +1,8 @@
 <template>
   <div class="page">
     <div class="card">
-      <h1 class="title">運転免許の知識練習</h1>
-      <p class="subtitle">登录后开始练习</p>
+      <h1 class="title">注册账号</h1>
+      <p class="subtitle">创建一个新账号开始练习</p>
 
       <input
         v-model="email"
@@ -14,19 +14,26 @@
       <input
         v-model="password"
         type="password"
-        placeholder="密码"
+        placeholder="密码（至少 6 位）"
         class="input"
       />
 
-      <button class="btn primary" :disabled="loading" @click="login">
-        {{ loading ? "登录中..." : "登录" }}
+      <input
+        v-model="confirm"
+        type="password"
+        placeholder="确认密码"
+        class="input"
+      />
+
+      <button class="btn primary" :disabled="loading" @click="register">
+        {{ loading ? "注册中..." : "注册" }}
       </button>
 
       <p class="error" v-if="error">{{ error }}</p>
 
       <div class="footer">
-        <span>还没有账号？</span>
-        <button class="link" @click="goRegister">注册</button>
+        <span>已有账号？</span>
+        <button class="link" @click="goLogin">去登录</button>
       </div>
     </div>
   </div>
@@ -41,12 +48,23 @@ const router = useRouter();
 
 const email = ref("");
 const password = ref("");
+const confirm = ref("");
 const loading = ref(false);
 const error = ref("");
 
-const login = async () => {
-  if (!email.value || !password.value) {
-    error.value = "请输入邮箱和密码";
+const register = async () => {
+  if (!email.value || !password.value || !confirm.value) {
+    error.value = "请填写完整信息";
+    return;
+  }
+
+  if (password.value.length < 6) {
+    error.value = "密码至少 6 位";
+    return;
+  }
+
+  if (password.value !== confirm.value) {
+    error.value = "两次密码不一致";
     return;
   }
 
@@ -54,26 +72,28 @@ const login = async () => {
   loading.value = true;
 
   try {
-    const res = await http.post("/login", {
-  email: email.value,
-  password: password.value,
-});
-console.log("【登录接口返回】", res.data);//1月31日晚测试
-    localStorage.setItem("token", res.data.access_token);
-    router.push("/home"); // 或 /quiz
-  } catch (e) {
-    error.value = "邮箱或密码错误";
+    await http.post("/register", {
+      email: email.value,
+      password: password.value,
+    });
+
+    alert("注册成功，请登录");
+    router.push("/login");
+  } catch (e: any) {
+    error.value =
+      e?.response?.data?.detail || "注册失败，邮箱可能已存在";
   } finally {
     loading.value = false;
   }
 };
 
-const goRegister = () => {
-  router.push("/register"); // 先占位
+const goLogin = () => {
+  router.push("/login");
 };
 </script>
 
 <style scoped>
+/* 和 Login.vue 完全一致，保证风格统一 */
 * {
   box-sizing: border-box;
 }
