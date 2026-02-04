@@ -5,6 +5,7 @@ from sqlalchemy import (
     DateTime,
     Boolean,
     ForeignKey,
+    Text,
 )
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -26,6 +27,7 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    is_admin = Column(Boolean, default=False)
 
 # =====================
 # 题目（判断题）
@@ -91,3 +93,18 @@ class QuizAnswer(Base):
 
     session = relationship("QuizSession", back_populates="answers")
     question = relationship("Question", back_populates="answers")
+
+
+# =====================
+# 上传题目
+# =====================
+class JudgeQuestion(Base):
+    __tablename__ = "judge_questions"
+
+    id = Column(Integer, primary_key=True)
+    content = Column(Text, nullable=False)
+    answer = Column(Boolean, nullable=False)
+    image_url = Column(String, nullable=True)
+    analysis = Column(Text, nullable=True)
+    region = Column(String(20), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

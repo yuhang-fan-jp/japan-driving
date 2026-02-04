@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class QuestionPublic(BaseModel):
     id: int
@@ -14,3 +14,10 @@ class QuestionOut(BaseModel):
     id: int
     content: str
     image_url: Optional[str]
+
+class JudgeQuestionCreate(BaseModel):
+    content: str
+    answer: bool
+    analysis: str
+    images: List[str] = []
+    region: str | None = None

@@ -1,6 +1,6 @@
 from .user import UserCreate, UserResponse
 from .token import TokenResponse
-from .question import QuestionPublic
+from .question import QuestionPublic, JudgeQuestionCreate
 from .user import (
     UserCreate,
     UserResponse,
@@ -8,3 +8,4 @@ from .user import (
     ChangePassword,
     TokenResponse,
 )
+from .judge import JudgeQuestionCreate
